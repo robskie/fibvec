@@ -18,12 +18,12 @@ const (
 	// sr is the rank sampling block size.
 	// This represents the number of bits in
 	// each rank sampling block.
-	sr = 2048
+	sr = 1024
 
 	// ss is the number of 1s in each select
 	// sampling block. Note that the number of
 	// bits in each block varies.
-	ss = 128
+	ss = 256
 )
 
 // Vector represents a container for unsigned integers.
@@ -67,11 +67,23 @@ func (v *Vector) Add(n uint) {
 		panic("fibvec: input is greater than max encodable value")
 	}
 
-	idx := v.bits.Len() - 3
-	fc, size := fibencode(n)
-
-	v.bits.Insert(idx, fc, size)
 	v.length++
+	idx := v.bits.Len() - 3
+	fc, lfc := fibencode(n)
+	size := lfc
+
+	if lfc > 64 {
+		v.bits.Insert(idx, fc[0], 64)
+		lfc -= 64
+
+		for _, f := range fc[1 : len(fc)-1] {
+			v.bits.Add(f, 64)
+			lfc -= 64
+		}
+		v.bits.Add(fc[len(fc)-1], lfc)
+	} else {
+		v.bits.Insert(idx, fc[0], lfc)
+	}
 
 	// Add bit padding so that pairs
 	// of 1 (11s) don't get separated

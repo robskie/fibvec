@@ -2,7 +2,6 @@ package fibvec
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 	"testing"
 	"unsafe"
@@ -12,9 +11,9 @@ import (
 
 func TestAddGet(t *testing.T) {
 	vec := NewVector()
-	values := make([]uint, 1e6)
+	values := make([]uint, 1e5)
 	for i := range values {
-		v := uint(rand.Intn(MaxValue))
+		v := uint(rand.Int63())
 		values[i] = v
 
 		vec.Add(v)
@@ -31,7 +30,7 @@ func TestGetValues(t *testing.T) {
 	vec := NewVector()
 	values := make([]uint, 1e3)
 	for i := range values {
-		v := uint(rand.Intn(MaxValue))
+		v := uint(rand.Int63())
 		values[i] = v
 
 		vec.Add(v)
@@ -45,12 +44,13 @@ func TestGetValues(t *testing.T) {
 
 }
 
-// Tests the overhead of the rank
-// and select auxilliary arrays.
+// TestAuxOverhead calculates the
+// overhead of the rank and select
+// auxilliary arrays for uint32 values.
 func TestAuxOverhead(t *testing.T) {
 	vec := NewVector()
-	for i := 0; i < 1e6; i++ {
-		v := uint(rand.Intn(MaxValue))
+	for i := 0; i < 1e5; i++ {
+		v := uint(rand.Uint32())
 		vec.Add(v)
 	}
 
@@ -61,35 +61,22 @@ func TestAuxOverhead(t *testing.T) {
 	fmt.Printf("=== OVERHEAD: %.2f%%\n", percentage)
 }
 
-func TestCompression32(t *testing.T) {
-	vec := NewVector()
-	for i := 0; i < 1e6; i++ {
-		v := uint(rand.Intn(math.MaxUint32))
-		vec.Add(v)
-	}
-
-	sizeofUint := int(unsafe.Sizeof(uint(0)))
-
-	rawsize := float64(sizeofUint * 1e6)
-	vecsize := float64(vec.Size())
-
-	percentage := (rawsize - vecsize) / rawsize * 100
-	fmt.Printf("=== COMPRESSION: %.2f%%\n", percentage)
-}
-
+// TestCompression calculates the
+// space saved with respect to the
+// raw size for random uint32 values.
 func TestCompression(t *testing.T) {
 	vec := NewVector()
-	for i := 0; i < 1e6; i++ {
-		v := uint(rand.Intn(MaxValue))
+	for i := 0; i < 1e5; i++ {
+		v := uint(rand.Uint32())
 		vec.Add(v)
 	}
 
 	sizeofUint := int(unsafe.Sizeof(uint(0)))
 
-	rawsize := float64(sizeofUint * 1e6)
+	rawsize := float64(sizeofUint * 1e5)
 	vecsize := float64(vec.Size())
 
-	percentage := (rawsize - vecsize) / rawsize * 100
+	percentage := ((rawsize - vecsize) / rawsize) * 100
 	fmt.Printf("=== COMPRESSION: %.2f%%\n", percentage)
 }
 
@@ -97,7 +84,7 @@ func BenchmarkAdd(b *testing.B) {
 	vec := NewVector()
 	values := make([]uint, b.N)
 	for i := range values {
-		values[i] = uint(rand.Intn(MaxValue))
+		values[i] = uint(rand.Int63())
 	}
 
 	b.ResetTimer()
@@ -108,8 +95,8 @@ func BenchmarkAdd(b *testing.B) {
 
 func BenchmarkGet(b *testing.B) {
 	vec := NewVector()
-	for i := 0; i < 1e6; i++ {
-		v := uint(rand.Intn(MaxValue))
+	for i := 0; i < 1e5; i++ {
+		v := uint(rand.Int63())
 		vec.Add(v)
 	}
 

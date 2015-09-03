@@ -8,31 +8,25 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFibDecode(t *testing.T) {
+func TestFibEncDec(t *testing.T) {
 	array := bit.NewArray(0)
 
-	// Populate array
-	num := int(1e6)
+	num := int(1e5)
 	values := make([]uint, num)
-	for i := 0; i < num; i++ {
-		v := uint(rand.Intn(MaxValue) + 2)
-		values[i] = v - 2
+	for i := range values {
+		v := uint(rand.Int63())
+		values[i] = v
 
-		fc, lfc := fencode(v)
-		array.Add(fc, lfc)
-
-		// Add padding at array boundary
-		if (array.Len()-1)&63 == 62 {
-			array.Add(0x3, 2)
+		fc, lfc := fibencode(v)
+		for _, f := range fc[:len(fc)-1] {
+			array.Add(f, 64)
+			lfc -= 64
 		}
+		array.Add(fc[len(fc)-1], lfc)
 	}
-
-	// Add terminating bits plus padding.
 	array.Add(0x3, 16)
 
-	bits := array.Bits()
-	bytes := byteSliceFromUint64Slice(bits)
-
+	bytes := byteSliceFromUint64Slice(array.Bits())
 	result := fibdecode(bytes, num)
 	for i, v := range values {
 		if !assert.Equal(t, v, result[i]) {
@@ -41,26 +35,42 @@ func TestFibDecode(t *testing.T) {
 	}
 }
 
-func BenchmarkFibDecode(b *testing.B) {
-	values := make([][]byte, 1e3)
-	for i := range values {
-		v := uint(rand.Intn(MaxValue) + 2)
-		fc, lfc := fencode(v)
-
-		array := bit.NewArray(0)
-		array.Add(fc, lfc)
-		array.Add(0x3, 16)
-
-		values[i] = byteSliceFromUint64Slice(array.Bits())
-	}
-
-	idx := make([]int, b.N)
-	for i := range idx {
-		idx[i] = rand.Intn(len(values))
+func BenchmarkFibEnc(b *testing.B) {
+	val := make([]uint, b.N)
+	for i := range val {
+		val[i] = uint(rand.Int63())
 	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		fibdecode(values[idx[i]], 1)
+		fibencode(val[i])
+	}
+}
+
+func BenchmarkFibDec(b *testing.B) {
+	enc := make([][]byte, 1e5)
+	for i := range enc {
+		v := uint(rand.Int63())
+		fc, lfc := fibencode(v)
+
+		array := bit.NewArray(0)
+		for _, f := range fc[:len(fc)-1] {
+			array.Add(f, 64)
+			lfc -= 64
+		}
+		array.Add(fc[len(fc)-1], lfc)
+		array.Add(0x3, 16)
+
+		enc[i] = byteSliceFromUint64Slice(array.Bits())
+	}
+
+	idx := make([]int, b.N)
+	for i := range idx {
+		idx[i] = rand.Intn(len(enc))
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		fibdecode(enc[idx[i]], 1)
 	}
 }
