@@ -44,6 +44,27 @@ func TestGetValues(t *testing.T) {
 
 }
 
+func TestEncodeDecode(t *testing.T) {
+	vec := NewVector()
+	values := make([]uint, 1e5)
+	for i := range values {
+		v := uint(rand.Int63())
+		values[i] = v
+
+		vec.Add(v)
+	}
+
+	data, _ := vec.GobEncode()
+	nvec := NewVector()
+	nvec.GobDecode(data)
+
+	for i, v := range values {
+		if !assert.Equal(t, v, nvec.Get(i)) {
+			break
+		}
+	}
+}
+
 // TestAuxOverhead calculates the
 // overhead of the rank and select
 // auxilliary arrays for uint32 values.

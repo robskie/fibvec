@@ -5,6 +5,8 @@
 package fibvec
 
 import (
+	"bytes"
+	"encoding/gob"
 	"unsafe"
 
 	"github.com/robskie/bit"
@@ -200,6 +202,34 @@ func (v *Vector) Size() int {
 // Len returns the number of values stored.
 func (v *Vector) Len() int {
 	return v.length
+}
+
+// GobEncode encodes this vector into gob streams.
+func (v *Vector) GobEncode() ([]byte, error) {
+	buf := &bytes.Buffer{}
+	enc := gob.NewEncoder(buf)
+
+	enc.Encode(v.bits)
+	enc.Encode(v.ranks)
+	enc.Encode(v.indices)
+	enc.Encode(v.popcount)
+	enc.Encode(v.length)
+
+	return buf.Bytes(), nil
+}
+
+// GobDecode populates this vector from gob streams.
+func (v *Vector) GobDecode(data []byte) error {
+	buf := bytes.NewReader(data)
+	dec := gob.NewDecoder(buf)
+
+	dec.Decode(v.bits)
+	dec.Decode(&v.ranks)
+	dec.Decode(&v.indices)
+	dec.Decode(&v.popcount)
+	dec.Decode(&v.length)
+
+	return nil
 }
 
 // select11 selects the ith 11 pair.
