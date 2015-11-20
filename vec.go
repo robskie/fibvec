@@ -44,29 +44,35 @@ type Vector struct {
 
 	popcount int
 
-	length int
+	length      int
+	initialized bool
+}
+
+// Initialize vector
+func (v *Vector) init() {
+	v.bits = bit.NewArray(0)
+	v.ranks = make([]int, 1)
+	v.indices = make([]int, 1)
+
+	// Add terminating bits
+	v.bits.Add(0x3, 3)
+
+	v.initialized = true
 }
 
 // NewVector creates a new vector.
 func NewVector() *Vector {
-	b := bit.NewArray(0)
-	rs := make([]int, 1)
-	idx := make([]int, 1)
-
-	// Add terminating bits
-	b.Add(0x3, 3)
-
-	return &Vector{
-		bits:    b,
-		ranks:   rs,
-		indices: idx,
-	}
+	vec := &Vector{}
+	vec.init()
+	return vec
 }
 
 // Add adds an unsigned integer to the vector.
 func (v *Vector) Add(n uint) {
 	if n > MaxValue {
 		panic("fibvec: input is greater than max encodable value")
+	} else if !v.initialized {
+		v.init()
 	}
 
 	v.length++
@@ -214,6 +220,7 @@ func (v *Vector) GobEncode() ([]byte, error) {
 	enc.Encode(v.indices)
 	enc.Encode(v.popcount)
 	enc.Encode(v.length)
+	enc.Encode(v.initialized)
 
 	return buf.Bytes(), nil
 }
@@ -228,6 +235,7 @@ func (v *Vector) GobDecode(data []byte) error {
 	dec.Decode(&v.indices)
 	dec.Decode(&v.popcount)
 	dec.Decode(&v.length)
+	dec.Decode(&v.initialized)
 
 	return nil
 }
