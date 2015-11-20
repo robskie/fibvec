@@ -67,17 +67,22 @@ func NewVector() *Vector {
 	return vec
 }
 
-// Add adds an unsigned integer to the vector.
-func (v *Vector) Add(n uint) {
-	if n > MaxValue {
-		panic("fibvec: input is greater than max encodable value")
+// Add adds an integer to the vector.
+func (v *Vector) Add(n int) {
+	if n > MaxValue || n < MinValue {
+		panic("fibvec: input is not in the range of encodable values")
 	} else if !v.initialized {
 		v.init()
 	}
 
+	// Convert to sign-magnitude representation
+	// so that "small" negative numbers such as
+	// -1, -2, -3... can be encoded
+	nn := toSignMagnitude(n)
+
 	v.length++
 	idx := v.bits.Len() - 3
-	fc, lfc := fibencode(n)
+	fc, lfc := fibencode(nn)
 	size := lfc
 
 	if lfc > 64 {
@@ -125,7 +130,7 @@ func (v *Vector) Add(n uint) {
 }
 
 // Get returns the value at index i.
-func (v *Vector) Get(i int) uint {
+func (v *Vector) Get(i int) int {
 	if i >= v.length {
 		panic("fibvec: index out of bounds")
 	} else if i < 0 {
@@ -159,7 +164,7 @@ func (v *Vector) Get(i int) uint {
 }
 
 // GetValues returns the values from start to end-1.
-func (v *Vector) GetValues(start, end int) []uint {
+func (v *Vector) GetValues(start, end int) []int {
 	if end-start <= 0 {
 		panic("fibvec: end must be greater than start")
 	} else if start < 0 || end < 0 {

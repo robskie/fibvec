@@ -8,9 +8,11 @@ import (
 	"github.com/robskie/bit"
 )
 
-// MaxValue is the maximum
-// value that can be stored.
-const MaxValue = math.MaxUint64 - 3
+// Maximum and minimum value that can be encoded.
+const (
+	MaxValue = math.MaxInt64 - 3
+	MinValue = -MaxValue
+)
 
 type decRecord struct {
 	// shift contains the size of
@@ -114,11 +116,11 @@ func fibencode(n uint) ([]uint64, int) {
 //
 // See Fast decoding algorithms for variable-length codes
 // and Fast Fibonacci Decompression Algorithm by Platos et al.
-func fibdecode(input []byte, count int) []uint {
+func fibdecode(input []byte, count int) []int {
 	prevIn := input[0]
 	fbuffer := make([]byte, 0, 16)
 	prevRec := fdecTable[0][prevIn]
-	result := make([]uint, 0, count)
+	result := make([]int, 0, count)
 
 	for _, in := range input[1:] {
 		startWithOne := false
@@ -148,7 +150,7 @@ func fibdecode(input []byte, count int) []uint {
 			if dec > 1 {
 				// Subtract 2 to cancel out
 				// what is added during encoding
-				result = append(result, dec-2)
+				result = append(result, fromSignMagnitude(dec-2))
 				if len(result) == count {
 					return result
 				}
@@ -163,7 +165,7 @@ func fibdecode(input []byte, count int) []uint {
 			fbuffer = fbuffer[:0]
 
 			if dec > 1 {
-				result = append(result, dec-2)
+				result = append(result, fromSignMagnitude(dec-2))
 				if len(result) == count {
 					return result
 				}
@@ -206,4 +208,24 @@ func byteSliceFromUint64Slice(bits []uint64) []byte {
 	bytes := *(*[]uint8)(unsafe.Pointer(sh))
 
 	return bytes
+}
+
+func toSignMagnitude(v int) uint {
+	const mask = ^(^uint(0) >> 1)
+
+	if v < 0 {
+		return uint(-v) | mask
+	}
+
+	return uint(v)
+}
+
+func fromSignMagnitude(v uint) int {
+	const mask = ^(^uint(0) >> 1)
+
+	if v&mask == mask {
+		return -int(v & ^mask)
+	}
+
+	return int(v)
 }

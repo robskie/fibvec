@@ -11,9 +11,9 @@ import (
 
 func TestAddGet(t *testing.T) {
 	vec := NewVector()
-	values := make([]uint, 1e5)
+	values := make([]int, 1e5)
 	for i := range values {
-		v := uint(rand.Int63())
+		v := int(rand.Int63())
 		values[i] = v
 
 		vec.Add(v)
@@ -26,11 +26,25 @@ func TestAddGet(t *testing.T) {
 	}
 }
 
+func TestAddGetNegative(t *testing.T) {
+	vec := NewVector()
+	values := []int{MinValue, -3, -2, -1, 0, 1, 2, 3, MaxValue}
+	for _, v := range values {
+		vec.Add(v)
+	}
+
+	for i, v := range values {
+		if !assert.Equal(t, v, vec.Get(i)) {
+			break
+		}
+	}
+}
+
 func TestGetValues(t *testing.T) {
 	vec := NewVector()
-	values := make([]uint, 1e3)
+	values := make([]int, 1e3)
 	for i := range values {
-		v := uint(rand.Int63())
+		v := int(rand.Int63())
 		values[i] = v
 
 		vec.Add(v)
@@ -46,9 +60,9 @@ func TestGetValues(t *testing.T) {
 
 func TestEncodeDecode(t *testing.T) {
 	vec := NewVector()
-	values := make([]uint, 1e5)
+	values := make([]int, 1e5)
 	for i := range values {
-		v := uint(rand.Int63())
+		v := int(rand.Int63())
 		values[i] = v
 
 		vec.Add(v)
@@ -71,7 +85,7 @@ func TestEncodeDecode(t *testing.T) {
 func TestAuxOverhead(t *testing.T) {
 	vec := NewVector()
 	for i := 0; i < 1e5; i++ {
-		v := uint(rand.Uint32())
+		v := int(rand.Uint32())
 		vec.Add(v)
 	}
 
@@ -88,7 +102,7 @@ func TestAuxOverhead(t *testing.T) {
 func TestCompression(t *testing.T) {
 	vec := NewVector()
 	for i := 0; i < 1e5; i++ {
-		v := uint(rand.Uint32())
+		v := int(rand.Uint32())
 		vec.Add(v)
 	}
 
@@ -103,9 +117,9 @@ func TestCompression(t *testing.T) {
 
 func BenchmarkAdd(b *testing.B) {
 	vec := NewVector()
-	values := make([]uint, b.N)
+	values := make([]int, b.N)
 	for i := range values {
-		values[i] = uint(rand.Int63())
+		values[i] = int(rand.Int63())
 	}
 
 	b.ResetTimer()
@@ -117,7 +131,7 @@ func BenchmarkAdd(b *testing.B) {
 func BenchmarkGet(b *testing.B) {
 	vec := NewVector()
 	for i := 0; i < 1e5; i++ {
-		v := uint(rand.Int63())
+		v := int(rand.Int63())
 		vec.Add(v)
 	}
 

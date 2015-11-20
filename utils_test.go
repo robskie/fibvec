@@ -29,7 +29,7 @@ func TestFibEncDec(t *testing.T) {
 	bytes := byteSliceFromUint64Slice(array.Bits())
 	result := fibdecode(bytes, num)
 	for i, v := range values {
-		if !assert.Equal(t, v, result[i]) {
+		if !assert.EqualValues(t, v, result[i]) {
 			break
 		}
 	}
