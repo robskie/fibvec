@@ -235,6 +235,10 @@ func (v *Vector) GobDecode(data []byte) error {
 	buf := bytes.NewReader(data)
 	dec := gob.NewDecoder(buf)
 
+	if v.bits == nil {
+		v.bits = bit.NewArray(0)
+	}
+
 	dec.Decode(v.bits)
 	dec.Decode(&v.ranks)
 	dec.Decode(&v.indices)
