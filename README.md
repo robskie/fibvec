@@ -35,8 +35,8 @@ These benchmarks are done on a Core i5 at 2.3GHz. You can run these benchmarks
 by typing ```go test github.com/robskie/fibvec -bench=.*``` from terminal.
 
 ```
-BenchmarkFibEnc      1000000          1417 ns/op
-BenchmarkFibDec      3000000           517 ns/op
-BenchmarkAdd         1000000          1521 ns/op
-BenchmarkGet         2000000           650 ns/op
+BenchmarkFibEnc-4    1000000          1414 ns/op
+BenchmarkFibDec-4    3000000           447 ns/op
+BenchmarkAdd-4       1000000          1508 ns/op
+BenchmarkGet-4       3000000           570 ns/op
 ```

@@ -13,9 +13,9 @@ func TestAddGet(t *testing.T) {
 	vec := NewVector()
 	values := make([]int, 1e5)
 	for i := range values {
-		v := int(rand.Int63())
-		values[i] = v
+		v := rand.Intn(MaxValue)
 
+		values[i] = v
 		vec.Add(v)
 	}
 
@@ -44,9 +44,9 @@ func TestGetValues(t *testing.T) {
 	vec := NewVector()
 	values := make([]int, 1e3)
 	for i := range values {
-		v := int(rand.Int63())
-		values[i] = v
+		v := rand.Intn(MaxValue)
 
+		values[i] = v
 		vec.Add(v)
 	}
 
@@ -62,9 +62,9 @@ func TestEncodeDecode(t *testing.T) {
 	vec := NewVector()
 	values := make([]int, 1e5)
 	for i := range values {
-		v := int(rand.Int63())
-		values[i] = v
+		v := rand.Intn(MaxValue)
 
+		values[i] = v
 		vec.Add(v)
 	}
 
@@ -119,7 +119,7 @@ func BenchmarkAdd(b *testing.B) {
 	vec := NewVector()
 	values := make([]int, b.N)
 	for i := range values {
-		values[i] = int(rand.Int63())
+		values[i] = rand.Intn(MaxValue)
 	}
 
 	b.ResetTimer()
@@ -131,8 +131,7 @@ func BenchmarkAdd(b *testing.B) {
 func BenchmarkGet(b *testing.B) {
 	vec := NewVector()
 	for i := 0; i < 1e5; i++ {
-		v := int(rand.Int63())
-		vec.Add(v)
+		vec.Add(rand.Intn(MaxValue))
 	}
 
 	idx := make([]int, b.N)

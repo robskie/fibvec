@@ -20,12 +20,12 @@ const (
 	// sr is the rank sampling block size.
 	// This represents the number of bits in
 	// each rank sampling block.
-	sr = 1024
+	sr = 512
 
 	// ss is the number of 1s in each select
 	// sampling block. Note that the number of
 	// bits in each block varies.
-	ss = 256
+	ss = 640
 )
 
 // Vector represents a container for unsigned integers.
